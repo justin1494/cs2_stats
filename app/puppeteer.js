@@ -1,6 +1,6 @@
 "use server";
 
-import puppeteer from "puppeteer";
+import { chromium } from "playwright";
 
 async function waitForMatchesToLoad(page) {
   await page.waitForFunction(
@@ -13,10 +13,12 @@ async function waitForMatchesToLoad(page) {
 }
 
 export async function loginToLeetify() {
+  let browser;
   try {
     // Launch the browser
-    const browser = await puppeteer.launch({ headless: true }); // Set to true for headless mode
-    const page = await browser.newPage();
+    browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
     // Navigate to the Leetify login page
     await page.goto("https://leetify.com/login");
@@ -25,8 +27,8 @@ export async function loginToLeetify() {
     await page.waitForSelector('input[type="email"]');
 
     // Type in the email and password
-    await page.type('input[type="email"]', "m.jaskolowski1994@gmail.com");
-    await page.type('input[type="password"]', "Creative12345!");
+    await page.fill('input[type="email"]', "m.jaskolowski1994@gmail.com");
+    await page.fill('input[type="password"]', "Creative12345!");
 
     // Click the login button
     await page.click('button[type="submit"]');
@@ -50,20 +52,20 @@ export async function loginToLeetify() {
       });
     });
 
-    // console.log("Extracted Match IDs:");
-    // console.log(matchIds);
-    // Close the browser
-    await browser.close();
-
     return matchIds;
   } catch (error) {
     console.error("An error occurred:", error);
+    throw error;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
 export const getStats = async (gameID) => {
-  const match = await fetch(`https://api.leetify.com/api/games/${gameID}`);
-  const data = await match.json();
+  const response = await fetch(`https://api.leetify.com/api/games/${gameID}`);
+  const data = await response.json();
   const map = data.mapName;
   const score = data.teamScores;
   const players = data.playerStats.filter(
@@ -114,5 +116,6 @@ export const fetchAllStats = async () => {
     return allStats;
   } catch (error) {
     console.error("Error fetching all stats:", error);
+    throw error;
   }
 };
