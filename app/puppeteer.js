@@ -1,6 +1,7 @@
 "use server";
 
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chrome from "@sparticuz/chromium";
 
 async function waitForMatchesToLoad(page) {
   await page.waitForFunction(
@@ -14,12 +15,23 @@ async function waitForMatchesToLoad(page) {
 
 export async function loginToLeetify() {
   try {
+    // Set up Chrome options
+    const executablePath = await chrome.executablePath;
+
     // Launch the browser
-    const browser = await puppeteer.launch({ headless: true }); // Set to true for headless mode
+    const browser = await puppeteer.launch({
+      args: chrome.args,
+      executablePath,
+      headless: chrome.headless,
+    });
+
     const page = await browser.newPage();
 
+    // Set viewport to a common desktop resolution
+    await page.setViewport({ width: 1280, height: 800 });
+
     // Navigate to the Leetify login page
-    await page.goto("https://leetify.com/login");
+    await page.goto("https://leetify.com/login", { waitUntil: "networkidle0" });
 
     // Wait for the email input field to be visible
     await page.waitForSelector('input[type="email"]');
@@ -32,9 +44,11 @@ export async function loginToLeetify() {
     await page.click('button[type="submit"]');
 
     // Wait for navigation to complete
-    await page.waitForNavigation();
+    await page.waitForNavigation({ waitUntil: "networkidle0" });
 
-    await page.goto("https://leetify.com/app/matches/list");
+    await page.goto("https://leetify.com/app/matches/list", {
+      waitUntil: "networkidle0",
+    });
 
     // Wait for matches to load
     await waitForMatchesToLoad(page);
@@ -52,14 +66,17 @@ export async function loginToLeetify() {
 
     console.log("Extracted Match IDs:");
     console.log(matchIds);
+
     // Close the browser
     await browser.close();
 
     return matchIds;
   } catch (error) {
     console.error("An error occurred:", error);
+    throw error;
   }
 }
+
 
 export const getStats = async (gameID) => {
   const match = await fetch(`https://api.leetify.com/api/games/${gameID}`);
