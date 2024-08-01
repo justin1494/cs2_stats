@@ -1,6 +1,21 @@
 "use server";
 
-import { chromium } from "playwright";
+// const chromium = require("@sparticuz/chromium-min");
+import Chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer-core";
+// const puppeteer = require("puppeteer-core");
+
+async function getBrowser() {
+  return puppeteer.launch({
+    args: [...Chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    defaultViewport: Chromium.defaultViewport,
+    executablePath: await Chromium.executablePath(
+      `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+    ),
+    headless: Chromium.headless,
+    ignoreHTTPSErrors: true,
+  });
+}
 
 async function waitForMatchesToLoad(page) {
   await page.waitForFunction(
@@ -13,12 +28,10 @@ async function waitForMatchesToLoad(page) {
 }
 
 export async function loginToLeetify() {
-  let browser;
   try {
     // Launch the browser
-    browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const browser = await getBrowser();
+    const page = await browser.newPage();
 
     // Navigate to the Leetify login page
     await page.goto("https://leetify.com/login");
@@ -27,8 +40,8 @@ export async function loginToLeetify() {
     await page.waitForSelector('input[type="email"]');
 
     // Type in the email and password
-    await page.fill('input[type="email"]', "m.jaskolowski1994@gmail.com");
-    await page.fill('input[type="password"]', "Creative12345!");
+    await page.type('input[type="email"]', "m.jaskolowski1994@gmail.com");
+    await page.type('input[type="password"]', "Creative12345!");
 
     // Click the login button
     await page.click('button[type="submit"]');
@@ -52,20 +65,20 @@ export async function loginToLeetify() {
       });
     });
 
+    // console.log("Extracted Match IDs:");
+    // console.log(matchIds);
+    // Close the browser
+    await browser.close();
+
     return matchIds;
   } catch (error) {
     console.error("An error occurred:", error);
-    throw error;
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
   }
 }
 
 export const getStats = async (gameID) => {
-  const response = await fetch(`https://api.leetify.com/api/games/${gameID}`);
-  const data = await response.json();
+  const match = await fetch(`https://api.leetify.com/api/games/${gameID}`);
+  const data = await match.json();
   const map = data.mapName;
   const score = data.teamScores;
   const players = data.playerStats.filter(
@@ -116,6 +129,5 @@ export const fetchAllStats = async () => {
     return allStats;
   } catch (error) {
     console.error("Error fetching all stats:", error);
-    throw error;
   }
 };
