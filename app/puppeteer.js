@@ -50,8 +50,8 @@ export async function loginToLeetify() {
       });
     });
 
-    // console.log("Extracted Match IDs:");
-    // console.log(matchIds);
+    console.log("Extracted Match IDs:");
+    console.log(matchIds);
     // Close the browser
     await browser.close();
 
