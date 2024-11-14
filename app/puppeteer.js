@@ -1,21 +1,6 @@
 "use server";
 
-// const chromium = require("@sparticuz/chromium-min");
-import Chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
-// const puppeteer = require("puppeteer-core");
-
-async function getBrowser() {
-  return puppeteer.launch({
-    args: [...Chromium.args, "--hide-scrollbars", "--disable-web-security"],
-    defaultViewport: Chromium.defaultViewport,
-    executablePath: await Chromium.executablePath(
-      `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
-    ),
-    headless: Chromium.headless,
-    ignoreHTTPSErrors: true,
-  });
-}
+import puppeteer from "puppeteer";
 
 async function waitForMatchesToLoad(page) {
   await page.waitForFunction(
@@ -30,7 +15,7 @@ async function waitForMatchesToLoad(page) {
 export async function loginToLeetify() {
   try {
     // Launch the browser
-    const browser = await getBrowser();
+    const browser = await puppeteer.launch({ headless: true }); // Set to true for headless mode
     const page = await browser.newPage();
 
     // Navigate to the Leetify login page
@@ -81,6 +66,7 @@ export const getStats = async (gameID) => {
   const data = await match.json();
   const map = data.mapName;
   const score = data.teamScores;
+  const finishedAt = data.finishedAt;
   const players = data.playerStats.filter(
     (item) =>
       item.steam64Id === "76561198002392306" ||
@@ -101,6 +87,7 @@ export const getStats = async (gameID) => {
       tRoundsLost = Number(tRoundsLost),
       ctRoundsLost = Number(ctRoundsLost),
     }) => {
+      console.log(finishedAt);
       if (tRoundsWon + ctRoundsWon > tRoundsLost + ctRoundsLost) {
         matchWon = true;
       } else if (tRoundsWon + ctRoundsWon < tRoundsLost + ctRoundsLost) {
@@ -115,16 +102,20 @@ export const getStats = async (gameID) => {
         totalDeaths,
         totalDamage,
         kdRatio,
+        finishedAt,
       };
     }
   );
 
-  return [...refactoredPlayer, { map, score, matchWon }];
+  return [...refactoredPlayer, { map, score, matchWon, finishedAt }];
 };
 
 export const fetchAllStats = async () => {
   try {
-    const gamesArray = await loginToLeetify();
+    const response = await fetch(
+      "https://puppeteer-render-hbjn.onrender.com/scrape"
+    );
+    const gamesArray = await response.json();
     const allStats = await Promise.all(gamesArray.map(getStats));
     return allStats;
   } catch (error) {

@@ -13,6 +13,20 @@ const GameStatsTables = ({ data, isDarkMode }) => {
       </div>
     );
   }
+  // Function to format date as DD.MM.YYYY or return "N/A" for invalid dates
+  const formatDate = (dateString) => {
+    if (!dateString || isNaN(new Date(dateString).getTime())) {
+      return "N/A";
+    }
+    const date = new Date(dateString);
+    return date
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, ".");
+  };
 
   // Calculate summary statistics for each player
   const summary = data.reduce((acc, game) => {
@@ -27,6 +41,7 @@ const GameStatsTables = ({ data, isDarkMode }) => {
             kdRatioSum: 0,
             accuracySum: 0,
             gameCount: 0,
+            finishedAt: null,
           };
         }
         acc[player.name].totalKills += player.totalKills;
@@ -36,6 +51,13 @@ const GameStatsTables = ({ data, isDarkMode }) => {
         acc[player.name].kdRatioSum += player.kdRatio;
         acc[player.name].accuracySum += player.accuracy;
         acc[player.name].gameCount++;
+        // Update finishedAt if it's more recent
+        if (
+          !acc[player.name].finishedAt ||
+          player.finishedAt > acc[player.name].finishedAt
+        ) {
+          acc[player.name].finishedAt = player.finishedAt;
+        }
       }
     });
     return acc;
@@ -154,6 +176,11 @@ const GameStatsTables = ({ data, isDarkMode }) => {
             >
               Damage
             </th>
+            <th
+              className={`px-4 py-2 border-b ${themeClasses.tableHeaderCell}`}
+            >
+              Finished At
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -227,6 +254,9 @@ const GameStatsTables = ({ data, isDarkMode }) => {
                   className={`px-4 py-2 border-b ${themeClasses.tableCell} font-bold`}
                 >
                   {player.totalDamage}
+                </td>
+                <td className={`px-4 py-2 border-b ${themeClasses.tableCell}`}>
+                  {mapInfo.finishedAt}
                 </td>
               </tr>
             ));

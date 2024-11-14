@@ -4,12 +4,14 @@ import React, { useState, useEffect } from "react";
 import GameStatsTables from "./components/GameStatsTables";
 import ThemeToggle from "./components/ThemeToggle";
 import { fetchAllStats } from "./puppeteer";
+import { BeatLoader } from "react-spinners";
 
 export default function Page() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [gameData, setGameData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadingTime, setLoadingTime] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +33,19 @@ export default function Page() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    let timer;
+    if (isLoading) {
+      timer = setInterval(() => {
+        setLoadingTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      clearInterval(timer);
+      setLoadingTime(0);
+    }
+    return () => clearInterval(timer);
+  }, [isLoading]);
+
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
@@ -49,8 +64,13 @@ export default function Page() {
           <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
         </div>
         {isLoading ? (
-          <div className={isDarkMode ? "text-white" : "text-gray-900"}>
-            Loading...
+          <div
+            className={`flex flex-col items-center justify-center h-screen ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            <BeatLoader color={isDarkMode ? "white" : "gray"} size={30} />
+            <p className="text-2xl">Loading for {loadingTime} seconds...</p>
           </div>
         ) : error ? (
           <div className="text-red-500">Error: {error.message}</div>

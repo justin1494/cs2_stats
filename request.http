@@ -1,0 +1,19 @@
+### Get BTC exchange rate
+GET https://rest.coinapi.io/v1/exchangerate/BTC
+X-CoinAPI-Key: your_api_key
+Accept: application/json
+
+### Get ETH exchange rate
+GET https://rest.coinapi.io/v1/exchangerate/NEXO/USD
+X-CoinAPI-Key: 7E02A0AA-BABA-4A72-8543-A38AADD3E21C
+Accept: application/json
+
+### Get specific exchange rate (BTC to USD)
+GET https://rest.coinapi.io/v1/exchangerate/BTC/USD
+X-CoinAPI-Key: your_api_key
+Accept: application/json
+
+### Get specific exchange rate (ETH to EUR)
+GET https://rest.coinapi.io/v1/exchangerate/ETH/EUR
+X-CoinAPI-Key: your_api_key
+Accept: application/json
