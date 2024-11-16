@@ -17,7 +17,6 @@ export default function Page() {
     const fetchData = async () => {
       try {
         const data = await fetchAllStats();
-        console.log("Fetched data:", data); // Debug log
         const togetherData = data.filter(
           (matchArray) => matchArray.length === 3
         );

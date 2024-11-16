@@ -87,7 +87,6 @@ export const getStats = async (gameID) => {
       tRoundsLost = Number(tRoundsLost),
       ctRoundsLost = Number(ctRoundsLost),
     }) => {
-      console.log(finishedAt);
       if (tRoundsWon + ctRoundsWon > tRoundsLost + ctRoundsLost) {
         matchWon = true;
       } else if (tRoundsWon + ctRoundsWon < tRoundsLost + ctRoundsLost) {
@@ -117,6 +116,12 @@ export const fetchAllStats = async () => {
     );
     const gamesArray = await response.json();
     const allStats = await Promise.all(gamesArray.map(getStats));
+
+    // Sort the data by finishedAt from newest to oldest
+    allStats.sort(
+      (a, b) => new Date(b[0].finishedAt) - new Date(a[0].finishedAt)
+    );
+
     return allStats;
   } catch (error) {
     console.error("Error fetching all stats:", error);
