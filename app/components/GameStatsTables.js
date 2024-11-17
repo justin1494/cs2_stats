@@ -5,6 +5,8 @@ import React, { useState } from "react";
 const GameStatsTables = ({ data, isDarkMode }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage, setRecordsPerPage] = useState(15);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   if (!data || data.length === 0) {
     return (
@@ -27,8 +29,48 @@ const GameStatsTables = ({ data, isDarkMode }) => {
     return `${day}.${month}.${year} ${hours}:${minutes}`;
   };
 
-  // Calculate summary statistics for each player
-  const summary = data.reduce((acc, game) => {
+  const themeClasses = {
+    container: isDarkMode ? "text-white" : "text-gray-900",
+    table: isDarkMode
+      ? "bg-gray-800 border-gray-700"
+      : "bg-white border-gray-300",
+    tableHeader: isDarkMode ? "bg-gray-700" : "bg-gray-100",
+    tableHeaderCell: isDarkMode ? "border-gray-600" : "border-gray-300",
+    tableCell: isDarkMode ? "border-gray-700" : "border-gray-300",
+    botqRow: isDarkMode ? "bg-purple-900" : "bg-purple-100",
+    qrosRow: isDarkMode ? "bg-green-900" : "bg-green-100",
+    mapCell: isDarkMode ? "bg-yellow-800" : "bg-yellow-100",
+    gameNumberCell: isDarkMode ? "bg-gray-800" : "bg-white",
+    input: isDarkMode
+      ? "bg-gray-700 border-gray-600 text-white"
+      : "bg-white border-gray-300 text-gray-900",
+  };
+
+  const getMapBackgroundColor = (matchWon) => {
+    if (matchWon === null) return "bg-yellow-600";
+    return matchWon ? "bg-green-600" : "bg-red-600";
+  };
+
+  const reorderScore = (score, matchWon) => {
+    const [score1, score2] = score;
+    return matchWon
+      ? `${Math.max(score1, score2)} - ${Math.min(score1, score2)}`
+      : `${Math.min(score1, score2)} - ${Math.max(score1, score2)}`;
+  };
+
+  // Filter data based on date range
+  const filteredData = data.filter((game) => {
+    const gameDate = new Date(game[0].finishedAt);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+    if (end) {
+      end.setHours(23, 59, 59, 999); // Include the entire end date
+    }
+    return (!start || gameDate >= start) && (!end || gameDate <= end);
+  });
+
+  // Calculate summary statistics for each player based on filtered data
+  const summary = filteredData.reduce((acc, game) => {
     game.forEach((player) => {
       if (player.name) {
         if (!acc[player.name]) {
@@ -62,40 +104,14 @@ const GameStatsTables = ({ data, isDarkMode }) => {
     return acc;
   }, {});
 
-  const themeClasses = {
-    container: isDarkMode ? "text-white" : "text-gray-900",
-    table: isDarkMode
-      ? "bg-gray-800 border-gray-700"
-      : "bg-white border-gray-300",
-    tableHeader: isDarkMode ? "bg-gray-700" : "bg-gray-100",
-    tableHeaderCell: isDarkMode ? "border-gray-600" : "border-gray-300",
-    tableCell: isDarkMode ? "border-gray-700" : "border-gray-300",
-    botqRow: isDarkMode ? "bg-purple-900" : "bg-purple-100",
-    qrosRow: isDarkMode ? "bg-green-900" : "bg-green-100",
-    mapCell: isDarkMode ? "bg-yellow-800" : "bg-yellow-100",
-    gameNumberCell: isDarkMode ? "bg-gray-800" : "bg-white",
-    input: isDarkMode
-      ? "bg-gray-700 border-gray-600 text-white"
-      : "bg-white border-gray-300 text-gray-900",
-  };
-
-  const getMapBackgroundColor = (matchWon) => {
-    if (matchWon === null) return "bg-yellow-600";
-    return matchWon ? "bg-green-600" : "bg-red-600";
-  };
-
-  const reorderScore = (score, matchWon) => {
-    const [score1, score2] = score;
-    return matchWon
-      ? `${Math.max(score1, score2)} - ${Math.min(score1, score2)}`
-      : `${Math.min(score1, score2)} - ${Math.max(score1, score2)}`;
-  };
-
   // Calculate pagination values
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(data.length / recordsPerPage);
+  const currentRecords = filteredData.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -119,6 +135,28 @@ const GameStatsTables = ({ data, isDarkMode }) => {
           max="100"
           value={recordsPerPage}
           onChange={handleRecordsPerPageChange}
+          className={`px-2 py-1 border rounded ${themeClasses.input}`}
+        />
+      </div>
+      <div className="mb-4">
+        <label htmlFor="startDate" className="mr-2">
+          Start Date:
+        </label>
+        <input
+          type="date"
+          id="startDate"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className={`px-2 py-1 border rounded ${themeClasses.input}`}
+        />
+        <label htmlFor="endDate" className="ml-4 mr-2">
+          End Date:
+        </label>
+        <input
+          type="date"
+          id="endDate"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
           className={`px-2 py-1 border rounded ${themeClasses.input}`}
         />
       </div>
