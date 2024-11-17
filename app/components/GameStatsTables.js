@@ -5,8 +5,6 @@ import React, { useState } from "react";
 const GameStatsTables = ({ data, isDarkMode }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage, setRecordsPerPage] = useState(15);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
 
   if (!data || data.length === 0) {
     return (
@@ -58,19 +56,8 @@ const GameStatsTables = ({ data, isDarkMode }) => {
       : `${Math.min(score1, score2)} - ${Math.max(score1, score2)}`;
   };
 
-  // Filter data based on date range
-  const filteredData = data.filter((game) => {
-    const gameDate = new Date(game[0].finishedAt);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
-    if (end) {
-      end.setHours(23, 59, 59, 999); // Include the entire end date
-    }
-    return (!start || gameDate >= start) && (!end || gameDate <= end);
-  });
-
   // Calculate summary statistics for each player based on filtered data
-  const summary = filteredData.reduce((acc, game) => {
+  const summary = data.reduce((acc, game) => {
     game.forEach((player) => {
       if (player.name) {
         if (!acc[player.name]) {
@@ -107,11 +94,8 @@ const GameStatsTables = ({ data, isDarkMode }) => {
   // Calculate pagination values
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredData.slice(
-    indexOfFirstRecord,
-    indexOfLastRecord
-  );
-  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(data.length / recordsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -135,28 +119,6 @@ const GameStatsTables = ({ data, isDarkMode }) => {
           max="100"
           value={recordsPerPage}
           onChange={handleRecordsPerPageChange}
-          className={`px-2 py-1 border rounded ${themeClasses.input}`}
-        />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="startDate" className="mr-2">
-          Start Date:
-        </label>
-        <input
-          type="date"
-          id="startDate"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className={`px-2 py-1 border rounded ${themeClasses.input}`}
-        />
-        <label htmlFor="endDate" className="ml-4 mr-2">
-          End Date:
-        </label>
-        <input
-          type="date"
-          id="endDate"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
           className={`px-2 py-1 border rounded ${themeClasses.input}`}
         />
       </div>
