@@ -13,19 +13,18 @@ const GameStatsTables = ({ data, isDarkMode }) => {
       </div>
     );
   }
-  // Function to format date as DD.MM.YYYY or return "N/A" for invalid dates
+  // Function to format date as DD.MM.YYYY HH:mm or return "N/A" for invalid dates
   const formatDate = (dateString) => {
     if (!dateString || isNaN(new Date(dateString).getTime())) {
       return "N/A";
     }
     const date = new Date(dateString);
-    return date
-      .toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      .replace(/\//g, ".");
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
   };
 
   // Calculate summary statistics for each player
@@ -255,9 +254,16 @@ const GameStatsTables = ({ data, isDarkMode }) => {
                 >
                   {player.totalDamage}
                 </td>
-                <td className={`px-4 py-2 border-b ${themeClasses.tableCell}`}>
-                  {mapInfo.finishedAt}
-                </td>
+                {playerIndex === 0 && (
+                  <td
+                    rowSpan={2}
+                    className={`px-4 py-2 border-b ${
+                      themeClasses.tableCell
+                    } text-center ${getMapBackgroundColor(mapInfo.matchWon)}`}
+                  >
+                    {formatDate(mapInfo.finishedAt)}
+                  </td>
+                )}
               </tr>
             ));
           })}

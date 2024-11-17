@@ -66,6 +66,7 @@ export const getStats = async (gameID) => {
   const data = await match.json();
   const map = data.mapName;
   const score = data.teamScores;
+  const dataSource = data.dataSource;
   const finishedAt = data.finishedAt;
   const players = data.playerStats.filter(
     (item) =>
@@ -106,7 +107,10 @@ export const getStats = async (gameID) => {
     }
   );
 
-  return [...refactoredPlayer, { map, score, matchWon, finishedAt }];
+  return [
+    ...refactoredPlayer,
+    { map, score, matchWon, finishedAt, dataSource },
+  ];
 };
 
 export const fetchAllStats = async () => {
@@ -117,12 +121,16 @@ export const fetchAllStats = async () => {
     const gamesArray = await response.json();
     const allStats = await Promise.all(gamesArray.map(getStats));
 
-    // Sort the data by finishedAt from newest to oldest
-    allStats.sort(
+    // Filter to include only records with dataSource === 'matchmaking'
+    const filteredStats = allStats.filter((game) =>
+      game.some((item) => item.dataSource === "matchmaking")
+    );
+
+    const sortedStats = filteredStats.sort(
       (a, b) => new Date(b[0].finishedAt) - new Date(a[0].finishedAt)
     );
 
-    return allStats;
+    return sortedStats;
   } catch (error) {
     console.error("Error fetching all stats:", error);
   }
