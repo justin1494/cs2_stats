@@ -135,6 +135,14 @@ export default function Page() {
     return (!start || gameDate >= start) && (!end || gameDate <= end);
   });
 
+  // Calculate win rate
+  const totalGames = filteredData.length;
+  const totalWins = filteredData.filter((game) =>
+    game.some((item) => item.matchWon === true)
+  ).length;
+  const winRate =
+    totalGames > 0 ? ((totalWins / totalGames) * 100).toFixed(2) : "loading...";
+
   return (
     <div
       className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}
@@ -150,35 +158,46 @@ export default function Page() {
           </h1>
           <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
         </div>
-        <div className="mb-4">
-          <label htmlFor="startDate" className="mr-2">
-            Start Date:
-          </label>
-          <input
-            type="date"
-            id="startDate"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className={`px-2 py-1 border rounded ${
-              isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-            }`}
-          />
-          <label htmlFor="endDate" className="ml-4 mr-2">
-            End Date:
-          </label>
-          <input
-            type="date"
-            id="endDate"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className={`px-2 py-1 border rounded ${
-              isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-            }`}
-          />
+        <div className="mb-4 flex items-center">
+          <div>
+            <label htmlFor="startDate" className="mr-2">
+              Start Date:
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={`px-2 py-1 border rounded ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
+              }`}
+            />
+            <label htmlFor="endDate" className="ml-4 mr-2">
+              End Date:
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className={`px-2 py-1 border rounded ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
+              }`}
+            />
+          </div>
+          <div className="ml-4">
+            <span
+              className={`text-lg font-semibold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Win Rate: {winRate}%
+            </span>
+          </div>
         </div>
         <nav className="mb-4">
           <ul className="flex space-x-4">
