@@ -121,39 +121,8 @@ export const fetchAllStats = async () => {
     const response = await fetch(
       "https://puppeteer-render-hbjn.onrender.com/scrape"
     );
-    // const gamesArray = await response.json();
-    const gamesArray = [
-      "00a2176f-94c9-4948-a3fb-e83f1176b091",
-      "06d05e06-0a4a-47f1-bf33-d3404dfb0cfc",
-      "0d31abf0-c57b-45c8-b81c-64c3cd57f98b",
-      "14df2c3c-601e-4536-ab22-62dc6bf20ae3",
-      "1ae528a8-f3de-4f7e-bba4-5c267857939a",
-      "1cb7176a-5114-4cc7-aa98-83373a7b5342",
-      "1f4b75b5-b0e9-4b9e-a898-34ac5e02b1ec",
-      "20cb7065-cb4e-4492-a8f4-3d6da1fcdce4",
-      "20cb7065-cb4e-4332-a8f4-3d6da1fcdce4",
-      "29d13401-f903-46ef-b7ac-001fe93a061f",
-      "2a256906-3656-412e-bb63-0bd8cb1e8865",
-      "2afaed0b-a89b-4b1a-83aa-58d4c77fc001",
-      "2c7bfd81-f102-4f45-8ba6-f5181f5a2056",
-      "315a5153-6081-41b1-aea6-95711e0887da",
-      "33fb031b-b444-4812-8456-e2e55c5ada66",
-      "36c78310-1b96-4471-a033-f389f1fd22eb",
-      "3b4cd3eb-5bdc-442d-8cdc-15b9db0c9f13",
-      "3b5b0c7d-e8fd-41cf-ba26-26bd9a840c74",
-      "3bc00148-8cbb-4244-85de-ff592c5b6c8d",
-      "42269003-daf8-49c9-a91b-788f8dc49286",
-      "426003ef-0569-4c5a-b51f-0905c12cc2c8",
-      "550eb449-ae44-47b5-b00b-f0a631211e31",
-      "557b32a8-c7a3-4ff3-9ed5-71994a5d138c",
-      "5658b2de-9cac-462b-85e0-125a45c9e079",
-      "5acaa825-4459-4418-823d-351431f11786",
-      "5c2a6593-0971-4f4f-bebd-8c48422b312c",
-      "5f784d08-d2be-4d75-9cd8-64ed0b1fdb02",
-      "623e7868-39f3-4665-bd27-5ec0e19a961d",
-      "6391e3c8-66a3-49e3-8f92-283035d4997d",
-      "6c2320a3-869e-42cf-b1d6-c748b792a239",
-    ];
+    const gamesArray = await response.json();
+
     const allStats = await Promise.all(gamesArray.map(getStats));
     console.log("allstats");
 
