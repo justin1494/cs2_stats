@@ -64,11 +64,20 @@ export async function loginToLeetify() {
 export const getStats = async (gameID) => {
   const match = await fetch(`https://api.leetify.com/api/games/${gameID}`);
   const data = await match.json();
+  if (!data) {
+    return [];
+  }
   const map = data.mapName;
   const score = data.teamScores;
   const dataSource = data.dataSource;
   const finishedAt = data.finishedAt;
-  if (!data.playerStats) {
+  if (
+    !data.playerStats.filter(
+      (item) =>
+        item.steam64Id === "76561198002392306" ||
+        item.steam64Id === "76561198040886804"
+    )
+  ) {
     return [];
   }
   const players = data.playerStats.filter(
@@ -76,8 +85,11 @@ export const getStats = async (gameID) => {
       item.steam64Id === "76561198002392306" ||
       item.steam64Id === "76561198040886804"
   );
+  if (!players[0].tRoundsWon) {
+    return [];
+  }
   let matchWon = null;
-  const refactoredPlayer = players.map(
+  const refactoredPlayer = await players.map(
     ({
       name,
       accuracy,
